@@ -33,9 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String method = request.getMethod();
-        String path = request.getRequestURI();
-        if (shouldIgnore(method, path)) {
+        if (shouldIgnore(request)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -49,7 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean shouldIgnore(String method, String path) {
+    private boolean shouldIgnore(HttpServletRequest request) {
+        String method = request.getMethod();
+        String path = request.getRequestURI();
         return ignorePaths.stream().anyMatch(ignorePath -> new AntPathMatcher().match(ignorePath, path)) ||
                 ignorePathsPost.stream().anyMatch(ignorePath -> method.equals(HttpMethod.POST.name()) && new AntPathMatcher().match(ignorePath, path));
     }

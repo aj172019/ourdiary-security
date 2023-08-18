@@ -24,16 +24,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             List<String> grantedAuthorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-            if (isAllowed(grantedAuthorities)) {
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
+            if (isNotAllowed(grantedAuthorities)) {
                 throw new ServletException("Unauthorized access");
             }
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         filterChain.doFilter(request, response);
     }
 
-    private boolean isAllowed(List<String> grantedAuthorities) {
-        return allowedAuthorities.stream().anyMatch(grantedAuthorities::contains);
+    private boolean isNotAllowed(List<String> grantedAuthorities) {
+        return allowedAuthorities.stream().noneMatch(grantedAuthorities::contains);
     }
 }
